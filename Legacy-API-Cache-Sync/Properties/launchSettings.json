@@ -1,0 +1,11 @@
+﻿{
+  "profiles": {
+    "Legacy_API_Cache_Sync": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
