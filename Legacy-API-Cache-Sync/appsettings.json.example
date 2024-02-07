@@ -1,0 +1,29 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "apiBaseUrl": "http://15.204.244.137:30120/",
+  "apiKey": "",
+  "restBaseUrl": "https://rest.opfw.net",
+  "jsonPath": "c3",
+  "apiSleepDutation": 5,
+  "endpoints": [
+    "users",
+    "towImpounds",
+    "mechanicRepairs",
+    "vehicles",
+    "duty",
+    "items",
+    "players"
+  ],
+  "mySql": {
+    "host": "",
+    "user": "",
+    "password": "",
+    "database": ""
+  }
+
+}
