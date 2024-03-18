@@ -29,28 +29,22 @@ namespace Legacy_API_Cache_Sync
 
             if (Options.jsonPath != "" && !Directory.Exists(Path.Combine(AppContext.BaseDirectory, "temp",Options.jsonPath)))
                 Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "temp", Options.jsonPath));
-
-            var tasks = new List<Task>();
-
-            while (!stoppingToken.IsCancellationRequested)
+            
+            
+            _logger.LogInformation("Worker running at: {time}", DateTime.Now);
+            Logs.Logger.LogInformation("Sync running at: {time}", DateTime.Now);
+            try
             {
-                _logger.LogInformation("Worker running at: {time}", DateTime.Now);
-                Logs.Logger.LogInformation("Sync running at: {time}", DateTime.Now);
-                try
-                {
-                    tasks.Add(Task.Run(() => ApiRequester.RestApiSync(stoppingToken), stoppingToken));
-                    tasks.Add(Task.Run(() => ApiRequester.GetApiData(),stoppingToken));
-                    await Task.WhenAll(tasks);
-                    tasks.Clear();
-                }
-                catch (Exception ex)
-                {
-                    Logs.Logger.LogError(ex.Message);
-                }
-                Logs.Logger.LogInformation("Sync finished at: {time}, now sleeping for {duration} minutes", DateTime.Now, Options.ApiFreq);
-                await Task.Delay((int)TimeSpan.FromMinutes(Options.ApiFreq).TotalMilliseconds, stoppingToken);
-                
+                await ApiRequester.RestApiSync(stoppingToken);
+                    
             }
+            catch (Exception ex)
+            {
+                Logs.Logger.LogError(ex.Message);
+            }
+            Logs.Logger.LogInformation("Sync finished at: {time}", DateTime.Now);                
+            Environment.Exit(0);
+            
         }
 
         private void SetOptions()
@@ -66,6 +60,7 @@ namespace Legacy_API_Cache_Sync
             Options.MySqlUsername = settings.mySql.user;
             Options.MySqlPassword = settings.mySql.password;
             Options.MySqlDatabase = settings.mySql.database;
+            Options.MdtServer  = settings.MdtServer;
         }
     }
 }

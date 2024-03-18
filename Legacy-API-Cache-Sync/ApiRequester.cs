@@ -20,18 +20,6 @@ namespace Legacy_API_Cache_Sync
 
     internal class ApiRequester
     {
-        private static int _apiCounter = 0;
-
-        private static bool isRunning;
-
-        public static async Task GetApiData()
-        {
-            foreach (string endpoint in Options.Endpoints)
-            {
-               Sync(endpoint);
-            }
-        }
-
         private static async Task Sync(string endpoint)
         {
             Logs.Logger.LogInformation("Request Data for {0} endpoint", (object)endpoint);
@@ -58,15 +46,30 @@ namespace Legacy_API_Cache_Sync
 
         public static async Task RestApiSync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            foreach (string endpoint in Options.Endpoints)
             {
-                await CharacterSyncAsync(stoppingToken);
+                await Sync(endpoint);
                 await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-                await VehicleHoldsSync(stoppingToken);
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
-                await InmatesSync(stoppingToken);
-                await Task.Delay(TimeSpan.FromMinutes(5),stoppingToken);
             }
+            await CharacterSyncAsync(stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            if(stoppingToken.IsCancellationRequested) return;
+            await VehicleHoldsSync(stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            if (stoppingToken.IsCancellationRequested) return;
+            await InmatesSync(stoppingToken);
+            if (stoppingToken.IsCancellationRequested) return;
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            await SavePdTimesAsync();
+            if (stoppingToken.IsCancellationRequested) return;
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            await SaveEmsTimesAsync();
+            if (stoppingToken.IsCancellationRequested) return;
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            await SaveItemsAsync();
+            if (stoppingToken.IsCancellationRequested) return;
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            await SaveVehicleAsync();
         }
 
         private static async Task CharacterSyncAsync(CancellationToken stoppingToken)
@@ -200,6 +203,54 @@ namespace Legacy_API_Cache_Sync
             request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
             request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
             return httpClient.Send(request);
+        }
+
+        private static async Task SavePdTimesAsync()
+        {
+            HttpClient httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri(Options.ApiUrl);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{Options.MdtServer}/time/load");
+            request.Headers.Add("X-Version", "1");
+            request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
+            request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
+            await httpClient.SendAsync(request);
+            Logs.Logger.LogInformation("PD Time Sync Done");
+        }
+
+        private static async Task SaveEmsTimesAsync()
+        {
+            HttpClient httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri(Options.ApiUrl);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{Options.MdtServer}/time/ems/test/load");
+            request.Headers.Add("X-Version", "1");
+            request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
+            request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
+            await httpClient.SendAsync(request);
+            Logs.Logger.LogInformation("EMS TIme Sync Done");
+        }
+
+        private static async Task SaveVehicleAsync()
+        {
+            HttpClient httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri(Options.ApiUrl);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{Options.MdtServer}/vehicles/load");
+            request.Headers.Add("X-Version", "1");
+            request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
+            request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
+            await httpClient.SendAsync(request);
+            Logs.Logger.LogInformation("Vehicle Sync Done");
+        }
+
+        private static async Task SaveItemsAsync()
+        {
+            HttpClient httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri(Options.ApiUrl);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{Options.MdtServer}/items/load");
+            request.Headers.Add("X-Version", "1");
+            request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
+            request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
+            await httpClient.SendAsync(request);
+            Logs.Logger.LogInformation("Vehicle Sync Done");
         }
     }
 }

@@ -26,5 +26,7 @@ namespace Legacy_API_Cache_Sync
         public static string MySqlUsername { get; set; }
         public static string MySqlPassword { get; set; }
         public static string MySqlDatabase { get; set; }
+
+        public static string MdtServer { get; set; }
     }
 }
