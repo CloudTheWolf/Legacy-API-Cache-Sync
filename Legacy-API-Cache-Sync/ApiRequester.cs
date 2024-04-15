@@ -52,7 +52,10 @@ namespace Legacy_API_Cache_Sync
                 await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
             await CharacterSyncAsync(stoppingToken);
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
+            if (stoppingToken.IsCancellationRequested) return;
+            await VehicleSyncAsync(stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
             if(stoppingToken.IsCancellationRequested) return;
             await VehicleHoldsSync(stoppingToken);
             await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
@@ -84,7 +87,23 @@ namespace Legacy_API_Cache_Sync
             request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
             var body = await httpClient.SendAsync(request).ConfigureAwait(false);
             var result = await body.Content.ReadAsStringAsync().ConfigureAwait(false);
-            await ProcessLargeJson(result, 10000, stoppingToken);
+            await ProcessLargeJson(result, 10000, stoppingToken, "character");
+            Logs.Logger.LogInformation("Character Sync Done");
+        }
+
+        private static async Task VehicleSyncAsync(CancellationToken stoppingToken)
+        {
+            Logs.Logger.LogInformation("Syncing Character Vehicles From City");
+
+            var httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri(Options.RestUrl);
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.jsonPath}/character_vehicles/plate~/data");
+            request.Headers.Add("X-Version", "1");
+            request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
+            request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
+            var body = await httpClient.SendAsync(request).ConfigureAwait(false);
+            var result = await body.Content.ReadAsStringAsync().ConfigureAwait(false);
+            await ProcessLargeJson(result, 10000, stoppingToken, "vehicle");
             Logs.Logger.LogInformation("Character Sync Done");
         }
 
@@ -121,7 +140,7 @@ namespace Legacy_API_Cache_Sync
         }
 
         private static async Task ProcessLargeJson(string largeJsonString, int chunkSize,
-            CancellationToken stoppingToken)
+            CancellationToken stoppingToken, string type)
         {
             var jsonObject = JObject.Parse(largeJsonString);
 
@@ -150,7 +169,19 @@ namespace Legacy_API_Cache_Sync
 
                 string chunkJsonString = new JObject(new JProperty("data", chunkArray)).ToString();
                 Console.WriteLine($"Chunk {i}");
-                await SyncCharacterToMdt(chunkJsonString);
+                switch(type)
+                {
+                    case "character":
+                        await SyncCharacterToMdt(chunkJsonString);
+                        break;
+                    case "vehicle":
+                            await SyncCharacterVehiclesToMdt(chunkJsonString);
+                        break;
+                    default:
+                        Logs.Logger.LogWarning("{type} is and invalid type",type);
+                        break;
+                }
+                
                 if (stoppingToken.IsCancellationRequested) return;
             }
 
@@ -180,6 +211,44 @@ namespace Legacy_API_Cache_Sync
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.Add(new MySqlParameter("character_json", MySqlDbType.LongText)).Value = character_json;
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("=====");
+                Console.WriteLine(ex);
+                Console.WriteLine("=====");
+            }
+        }
+
+        private static async Task SyncCharacterVehiclesToMdt(string vehicle_json)
+        {
+
+            try
+            {
+
+                Console.WriteLine($"Sync Start");
+                var connectionString = new MySqlConnectionStringBuilder
+                {
+                    Server = Options.MySqlHost,
+                    Port = 3306,
+                    UserID = Options.MySqlUsername,
+                    Password = Options.MySqlPassword,
+                    Database = Options.MySqlDatabase
+                };
+
+                await using (MySqlConnection connection = new MySqlConnection(connectionString.ToString()))
+                {
+                    connection.Open();
+
+                    using (MySqlCommand command = new MySqlCommand("InsertOrUpdateCharacterVehicles", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.Add(new MySqlParameter("vehicle_json", MySqlDbType.LongText)).Value = vehicle_json;
 
                         command.ExecuteNonQuery();
                     }
