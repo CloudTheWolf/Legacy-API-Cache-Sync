@@ -273,7 +273,7 @@ namespace Legacy_API_Cache_Sync
             var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             Logs.Logger.LogInformation($"Get Inmates {timestamp}");
             var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.jsonPath}/" +
-                $"characters?select=character_id,first_name,last_name&where=jail>{timestamp}");
+                $"characters?select=character_id,first_name,last_name,jail&where=jail>{timestamp}");
             request.Headers.Add("X-Version", "1");
             request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
             request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
