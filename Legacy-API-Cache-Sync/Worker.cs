@@ -61,6 +61,7 @@ namespace Legacy_API_Cache_Sync
             Options.MySqlPassword = settings.mySql.password;
             Options.MySqlDatabase = settings.mySql.database;
             Options.MdtServer  = settings.MdtServer;
+            Options.serviceId = settings.serviceId;
         }
     }
 }

@@ -76,7 +76,7 @@ namespace Legacy_API_Cache_Sync
 
             var httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri(Options.RestUrl);
-            var request = new HttpRequestMessage(HttpMethod.Get, $"{Options.jsonPath}/" +
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{Options.serviceId}/" +
                 $"characters?select=character_id,first_name,last_name,gender,job_name,department_name,position_name,date_of_birth,phone_number,license_identifier,mugshot_url");
             request.Headers.Add("X-Version", "1");
             request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
@@ -93,7 +93,7 @@ namespace Legacy_API_Cache_Sync
 
             var httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri(Options.RestUrl);
-            var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.jsonPath}/character_vehicles?select=vehicle_id,owner_cid,model_name,plate,was_boosted&where=was_boosted=0");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.serviceId}/character_vehicles?select=vehicle_id,owner_cid,model_name,plate,was_boosted&where=was_boosted=0");
             request.Headers.Add("X-Version", "1");
             request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
             request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
@@ -109,7 +109,7 @@ namespace Legacy_API_Cache_Sync
 
             var httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri(Options.RestUrl);
-            var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.jsonPath}/finances?select=owner_cid,amount,timestamp,plate,completed");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.serviceId}/finances?select=owner_cid,amount,timestamp,plate,completed");
             request.Headers.Add("X-Version", "1");
             request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
             request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
@@ -231,7 +231,7 @@ namespace Legacy_API_Cache_Sync
 
             var httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri(Options.RestUrl);
-            var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.jsonPath}/character_vehicles?select=vehicle_id,plate&where=plate={query}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.serviceId}/character_vehicles?select=vehicle_id,plate&where=plate={query}");
             request.Headers.Add("X-Version", "1");
             request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
             request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
@@ -255,7 +255,7 @@ namespace Legacy_API_Cache_Sync
             httpClient.BaseAddress = new Uri(Options.RestUrl);
             var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             Logs.Logger.LogInformation($"Get Holds {timestamp}");
-            var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.jsonPath}/character_vehicles?select=vehicle_id,owner_cid,model_name,plate,was_boosted,police_impound_expire&where=police_impound_expire>{timestamp}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.serviceId}/character_vehicles?select=vehicle_id,owner_cid,model_name,plate,was_boosted,police_impound_expire&where=police_impound_expire>{timestamp}");
             request.Headers.Add("X-Version", "1");
             request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");
             request.Headers.Add("Authorization", "Bearer " + Options.ApiKey);
@@ -272,7 +272,7 @@ namespace Legacy_API_Cache_Sync
             httpClient.BaseAddress = new Uri(Options.RestUrl);
             var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             Logs.Logger.LogInformation($"Get Inmates {timestamp}");
-            var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.jsonPath}/" +
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/{Options.serviceId}/" +
                 $"characters?select=character_id,first_name,last_name,jail&where=jail>{timestamp}");
             request.Headers.Add("X-Version", "1");
             request.Headers.Add("X-Client-Name", "CloudTheWolf.API-Cache-Generator");

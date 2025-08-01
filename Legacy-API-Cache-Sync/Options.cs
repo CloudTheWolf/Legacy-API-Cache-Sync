@@ -20,6 +20,8 @@ namespace Legacy_API_Cache_Sync
 
         public static string jsonPath { get; set; }
 
+        public static string serviceId { get; set; }
+
         public static JArray Endpoints { get; set; }
 
         public static string MySqlHost { get; set; }
